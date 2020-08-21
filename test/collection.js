@@ -906,9 +906,24 @@ describe('Chained Collection ->', () => {
 
   it('pluck', async () => {
     const users = [
-      { id: 1, name: 'Marcus', email: 'marcus@test.com' },
-      { id: 2, name: 'Norman', email: 'norman@test.com' },
-      { id: 3, name: 'Christian', email: 'christian@test.com' }
+      { id: 1, name: 'Marcus', email: 'marcus@test.com', data: {
+        colors: ['red', 'green', 'blue'], stars: 5,
+        links: {
+          in: [1, 2]
+        }
+      } },
+      { id: 2, name: 'Norman', email: 'norman@test.com', data: {
+        colors: ['yellow', 'purple', 'black'], stars: 4, 
+        links: {
+          in: [3]
+        }
+      } },
+      { id: 3, name: 'Christian', email: 'christian@test.com', data: {
+        colors: ['orange', 'cyan', 'magenta'], stars: 3,
+        links: {
+          in: [4, 5]
+        }
+      } }
     ]
 
     expect(
@@ -922,7 +937,24 @@ describe('Chained Collection ->', () => {
       { name: 'Norman', email: 'norman@test.com' },
       { name: 'Christian', email: 'christian@test.com' }
     ])
+
+    expect(
+      await Collect(users).pluck('data.colors').all()
+    ).to.equal(['red', 'green', 'blue', 'yellow', 'purple', 'black', 'orange', 'cyan', 'magenta'])
+
+    expect(
+      await Collect(users).pluck('data.stars').all()
+    ).to.equal([5, 4, 3])
+
+    expect(
+      await Collect(users).pluck(['name', 'data.colors', 'data.stars', 'data.links.in']).all()
+    ).to.equal([
+      { name: 'Marcus', 'data.colors': ['red', 'green', 'blue'], 'data.stars': 5, 'data.links.in': [1, 2] },
+      { name: 'Norman', 'data.colors': ['yellow', 'purple', 'black'], 'data.stars': 4, 'data.links.in': [3] },
+      { name: 'Christian', 'data.colors': ['orange', 'cyan', 'magenta'], 'data.stars': 3, 'data.links.in': [4, 5] }
+    ])
   })
+  
 
   it('then', async () => {
     expect(
